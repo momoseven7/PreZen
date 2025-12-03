@@ -19,7 +19,6 @@ out/
 
 # Docker
 docker-compose.override.yml
-.dockerignore
 
 # PostgreSQL data (Docker volumes)
 postgres-data/
@@ -65,5 +64,5 @@ pnpm-debug.log*
 # TypeScript
 *.tsbuildinfo
 
-# Plane
+# Private project planning documents
 Plane/
