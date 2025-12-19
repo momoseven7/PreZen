@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # -----------------------------
+  # 1. Database Service (PostgreSQL)
+  # -----------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: prezen-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: prezen_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - prezen-network
+
+  # -----------------------------
+  # 2. Backend API (Node.js)
+  # -----------------------------
+  backend:
+    image: node:20-alpine
+    container_name: prezen-backend
+    working_dir: /app
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - DB_HOST=db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=prezen_db
+      - DB_TYPE=postgres
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - db
+    networks:
+      - prezen-network
+
+  # -----------------------------
+  # 3. Frontend (React)
+  # -----------------------------
+  frontend:
+    image: node:20-alpine
+    container_name: prezen-frontend
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:4000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - prezen-network
+
+  # -----------------------------
+  # 4. Analytics API (Python) - 作成始めたらコメントアウト外すよ
+  # -----------------------------
+  # analytics:
+  #   image: python:3.11-slim
+  #   container_name: prezen-analytics
+  #   working_dir: /app
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DB_HOST=db
+  #     - DB_USER=user
+  #     - DB_PASSWORD=password
+  #     - DB_NAME=prezen_db
+  #   volumes:
+  #     - ./analytics:/app
+  #   command: sh -c "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - prezen-network
+
+# -----------------------------
+# Volumes & Networks
+# -----------------------------
+volumes:
+  db_data:
+
+networks:
+  prezen-network:
+    driver: bridge

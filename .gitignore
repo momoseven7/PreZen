@@ -57,7 +57,7 @@ dist/
 build/
 
 # AIrules
-grous.md
+.agent/
 
 # archi
 flow/
